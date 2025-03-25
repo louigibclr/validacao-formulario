@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulário de Cadastro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <form id="cadastroForm">
+        <div class="form-group">
+            <label for="cpf">CPF:</label>
+            <input 
+                type="text" 
+                id="cpf" 
+                name="cpf" 
+                placeholder="000.000.000-00" 
+                required 
+                pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+                maxlength="14"
+            >
+            <span id="cpfError" class="error"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="telefone">Telefone:</label>
+            <input 
+                type="tel" 
+                id="telefone" 
+                name="telefone" 
+                placeholder="(00) 00000-0000" 
+                required 
+                pattern="\(\d{2}\) \d{5}-\d{4}"
+                maxlength="15"
+            >
+            <span id="telefoneError" class="error"></span>
+        </div>
+
+        <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+        const cpfInput = document.getElementById('cpf');
+        const telefoneInput = document.getElementById('telefone');
+        const cpfError = document.getElementById('cpfError');
+        const telefoneError = document.getElementById('telefoneError');
+        const form = document.getElementById('cadastroForm');
+
+        // Máscara para CPF
+        cpfInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{2})$/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Máscara para Telefone
+        telefoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+
+        // Validação de CPF
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/[^\d]+/g, '');
+            if (cpf.length !== 11) return false;
+            
+            // Validação de CPF básica
+            let soma = 0;
+            let resto;
+            
+            for (let i = 1; i <= 9; i++) 
+                soma = soma + parseInt(cpf.substring(i-1, i)) * (11 - i);
+            
+            resto = (soma * 10) % 11;
+            
+            if ((resto === 10) || (resto === 11)) resto = 0;
+            if (resto !== parseInt(cpf.substring(9, 10))) return false;
+            
+            soma = 0;
+            
+            for (let i = 1; i <= 10; i++) 
+                soma = soma + parseInt(cpf.substring(i-1, i)) * (12 - i);
+            
+            resto = (soma * 10) % 11;
+            
+            if ((resto === 10) || (resto === 11)) resto = 0;
+            if (resto !== parseInt(cpf.substring(10, 11))) return false;
+            
+            return true;
+        }
+
+        // Evento de submit do formulário
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Limpar erros anteriores
+            cpfError.textContent = '';
+            telefoneError.textContent = '';
+            
+            // Validar CPF
+            const cpfValue = cpfInput.value.replace(/[^\d]+/g, '');
+            if (!validarCPF(cpfValue)) {
+                cpfError.textContent = 'CPF inválido';
+                return;
+            }
+            
+            // Validar Telefone
+            const telefoneValue = telefoneInput.value.replace(/[^\d]+/g, '');
+            if (telefoneValue.length < 10) {
+                telefoneError.textContent = 'Telefone inválido';
+                return;
+            }
+            
+            // Se tudo estiver válido
+            alert('Formulário enviado com sucesso!');
+        });
+    </script>
+</body>
+</html>
